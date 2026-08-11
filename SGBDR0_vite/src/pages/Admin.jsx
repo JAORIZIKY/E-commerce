@@ -33,7 +33,7 @@ const Admin = () => {
   const [typeProduit, setTypeProduit] = useState([])
   const [produit, setProduit] = useState([])
 
-  const [typeSelect, setTypeSelect] = useState("")
+  const [typeSelect, setTypeSelect] = useState(0)
   let typeSelectionner = ""
 
   const [classMenu, setClassMenu] = useState(['m-auto flex [flex-direction:column] rounded-[0px_0px_10px_10px] bg-[rgb(200,200,200)] z-[-2] mt-19 p-[5px_0px] absolute [line-height:40px] [opacity:0] [transition:all_ease_40ms] [opacity:0]', false])
@@ -44,7 +44,7 @@ const Admin = () => {
   const [prix_unitaire, setPrix_unitaire] = useState(0)
   const [reduction, setReduction] = useState(0)
   const [qte, setQte] = useState(0)
-
+  const [nom_produitMax, setNom_produitMax] = useState('')
   const [nom_video, setNom_video] = useState('')
 
   const [nom_image, setNom_image] = useState('')
@@ -92,18 +92,23 @@ const Admin = () => {
   const chargerData = async () => {
       try {
           setLoading(true);
-          let response = await axios.get(`${API_URL}/*§t_typeProduit`);
+          let response = await axios.get(`${API_URL}/*§t_typeProduit ORDER BY id ASC`);
           setTypeProduit(response.data);
-          setTypeSelect(response.data[0].nomType)
-          response = await axios.get(`${API_URL}/*§t_video`)
+          if (response.data[0].id !== undefined) {
+            setTypeSelect(response.data[0].id)
+          }
+          
+          response = await axios.get(`${API_URL}/*§t_video ORDER BY id ASC`)
           setDataVideo(response.data)
 
-          response = await axios.get(`${API_URL}/*§t_image`)
+          response = await axios.get(`${API_URL}/*§t_image ORDER BY id ASC`)
           setDataImage(response.data)
 
-          response = await axios.get(`${API_URL}/*§t_produit`)
+          response = await axios.get(`${API_URL}/*§t_produit ORDER BY id ASC`)
           setDataProduit(response.data)
-          
+          if (response.data[0].id !== undefined) {
+            setTypeSelect(response.data[response.data.length - 1].id)
+          }          
           // response = await axios.get(`${API_URL}/t_produit.id, nom, t_typeProduit.nomType, prix_unitaire, reduction§t_produit INNER JOIN t_typeProduit WHERE t_produit.id_typeProduit = t_typeProduit.id`)
           // console.log(response);
           
@@ -114,38 +119,10 @@ const Admin = () => {
           setLoading(false);
       }
       
-  };
-  // Récupérer tous les donnees de page encours
-  
+  };  
 
-  const chargerDataPage = async (event) => {
-    event.preventDefault()
-   
-      try {
-          setLoading(true);
-          
-          dataImage.map((chaqueImage, i) => {
-            if(chaqueImage.nom_image === inputFileImage.name) {
-              setImageExist(true)
-              alert(imageExist)
-            }
-          })
-          dataVideo.map((chaqueVideo, i) => {
-            if(chaqueVideo.nom_video === inputFileVideo.name) {
-              setImageExist(true)
-              alert(videoExist)
-            }
-          })
-
-      } catch (error) {
-          console.error('Erreur chargement :', error);
-          alert('Erreur lors du chargement des donnée');
-      } finally {
-          setLoading(false);
-      }
-        
-    };
- 
+    
+  // Enregistrement  
   const handleEnvoyer = async (Event) => {
 
         const { table, colonnes, values } = formData;
@@ -175,7 +152,8 @@ const Admin = () => {
             return
         }
             
-  }   
+  }
+  // Enregistrement de type de produit
   function handleEnvoyerTypeProduit() {
     formData.values = formDataTypeProduit.values
     formData.colonnes = formDataTypeProduit.colonnes
@@ -190,9 +168,37 @@ const Admin = () => {
     setFormDataTypeProduit({ table: '', colonnes:'', values: [] })
     setEditingId(null);    
   }
+   // Enrregistrement de video, image, produit 
+      // verification de copie dans le dossier
+  const verificationImageVideo = async (event) => {
+    event.preventDefault()
+   
+      try {
+          setLoading(true);
+          
+          dataImage.map((chaqueImage, i) => {
+            if(chaqueImage.nom_image === inputFileImage.name) {
+              setImageExist(true)
+              alert(imageExist)
+            }
+          })
+          dataVideo.map((chaqueVideo, i) => {
+            if(chaqueVideo.nom_video === inputFileVideo.name) {
+              setImageExist(true)
+              alert(videoExist)
+            }
+          })
 
-  function handleEnvoyerProduit() {
-    formData.values = [nom, prix_unitaire, qte, reduction, ]
+      } catch (error) {
+          console.error('Erreur chargement :', error);
+          alert('Erreur lors du chargement des donnée');
+      } finally {
+          setLoading(false);
+      }
+        
+    };     
+  function handleEnvoyerImage() {
+    formData.values = [nom, prix_unitaire, qte, reduction, typeSelect]
     formData.colonnes = 'nom, prix_unitaire, qte, reduction, id_typeproduit '
     formData.table = 't_produit'
     setFormData(formData)
@@ -207,9 +213,27 @@ const Admin = () => {
     setFormData({ table: '', colonnes:'', values: [] });
     setEditingId(null);    
   }
-
+  function handleEnvoyerProduit() {
+    formData.values = [nom, prix_unitaire, qte, reduction, typeSelect]
+    formData.colonnes = 'nom, prix_unitaire, qte, reduction, id_typeproduit '
+    formData.table = 't_produit'
+    setFormData(formData)
+    alert(formData.colonnes)
+    alert(formData.values)
+    alert(formData.table)
+    handleEnvoyer()
+    // Recharger la liste
+    chargerData();
+    
+    // Réinitialiser le formulaire
+    setFormData({ table: '', colonnes:'', values: [] });
+    setEditingId(null);    
+  }
   async function sendData(event) {
       event.preventDefault();
+      handleEnvoyerProduit()
+      verificationImageVideo()
+      chargerData()
 
       async function envoyerFile(event, inputFile) {
 
@@ -305,38 +329,14 @@ const Admin = () => {
                   error.message
               );
           }
-      }
-
-    envoyerFile(event, inputFileImage)
-    envoyerFile(event, inputFileVideo)
-    // Validation simple
-    if (values === []) {
-        alert('Il y a des champs vide!');
-        return;
-    }
-    
-    try {
-        if (editingId) {
-            await axios.put(`${API_URL}/${editingId}`, formDataDiv);
-            alert('le nouveau catégorie de produit a été modifié avec succès !');
-        } else {
-            // MODE AJOUT : Requête POST
-            
-            await axios.post(API_URL, formDataDiv);
-            alert('le nouveau catégorie de produit a été ajouté avec succès !');
         }
-        /*
-        // Recharger la liste
-        chargerUtilisateurs();
-        */
-        // Réinitialiser le formulaire
-        setFormData({ table: '', colonnes:'', values: [] });
-        setEditingId(null);
-        
-    } catch (error) {
-        console.error('Erreur :', error);
-        alert('Erreur lors de l\'opération');
-    }    
+      if (imageExist === false) {
+        envoyerFile(event, inputFileImage)
+        }
+      if (imageExist === false) {
+       envoyerFile(event, inputFileVideo)
+        }
+     
 }
 
   return (
@@ -368,7 +368,7 @@ const Admin = () => {
                             setTypeSelect(e.target.value)
                           }}>
                     {typeProduit.map((chaqueType, i) => (
-                      <option value={chaqueType.nomType} class="border-blue-500 border-2">{chaqueType.nomType}</option>
+                      <option value={chaqueType.id} class="border-blue-500 border-2">{chaqueType.nomType}</option>
                     ))}
                   </select>                                  
                 </div>
@@ -429,7 +429,7 @@ const Admin = () => {
                 imageProduit={ligne1}
                 videoProduit={lignevideo}
                 prixProduit="100 Ar**200 Ar" />
-              <form onSubmit={chargerDataPage}>
+              <form onSubmit={handleEnvoyerProduit}>
                 <div class="w-[30%] m-auto mt-10 p-[20px_10px] border-blue-500 border-3 rounded-[20px]">
                   <div class="bg-[rgb(210,210,210)] w-[15%] absolute text-[25px] font-semibold mt-[-40px]">
                     <div class="w-full">
