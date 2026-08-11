@@ -106,8 +106,10 @@ const Admin = () => {
 
           response = await axios.get(`${API_URL}/*§t_produit ORDER BY id ASC`)
           setDataProduit(response.data)
-          if (response.data[0].id !== undefined) {
-            setTypeSelect(response.data[response.data.length - 1].id)
+
+          if (!response.data || typeof response.data[0] !== "undefined") {
+            console.log("indefini");
+            setNom_produitMax(response.data[response.data.length - 1].id)
           }          
           // response = await axios.get(`${API_URL}/t_produit.id, nom, t_typeProduit.nomType, prix_unitaire, reduction§t_produit INNER JOIN t_typeProduit WHERE t_produit.id_typeProduit = t_typeProduit.id`)
           // console.log(response);
@@ -135,14 +137,17 @@ const Admin = () => {
         
         try {
             if (editingId) {
-                
+              
                 await axios.put(`${API_URL}/${editingId}`, formData);
-                alert('le nouveau catégorie de produit a été modifié avec succès !');
+                alert('les nouveaux informations ont été modifié avec succès !');
             } else {
                 // MODE AJOUT : Requête POST
-                                
+                console.log(formData.values);
+                console.log(formData.colonnes);
+                console.log(formData.table);
+                                  
                 await axios.post(API_URL, formData);
-                alert('le nouveau catégorie de produit a été ajouté avec succès !');
+                alert('les nouveaux informations a été ajouté avec succès !');
             }
             
             
@@ -161,6 +166,8 @@ const Admin = () => {
     setFormData(formData)
     handleEnvoyer()
     // Recharger la liste
+    console.log("Rechargement");
+    
     chargerData();
     
     // Réinitialiser le formulaire
@@ -198,9 +205,9 @@ const Admin = () => {
         
     };     
   function handleEnvoyerImage() {
-    formData.values = [nom, prix_unitaire, qte, reduction, typeSelect]
-    formData.colonnes = 'nom, prix_unitaire, qte, reduction, id_typeproduit '
-    formData.table = 't_produit'
+    formData.values = [nom, nom_image, nom_produitMax]
+    formData.colonnes = 'nom, nom_image, id_produit '
+    formData.table = 't_image'
     setFormData(formData)
     alert(formData.colonnes)
     alert(formData.values)
@@ -234,7 +241,7 @@ const Admin = () => {
       handleEnvoyerProduit()
       verificationImageVideo()
       chargerData()
-
+      
       async function envoyerFile(event, inputFile) {
 
           event.preventDefault();
@@ -336,6 +343,7 @@ const Admin = () => {
       if (imageExist === false) {
        envoyerFile(event, inputFileVideo)
         }
+      handleEnvoyerImage()
      
 }
 
@@ -429,7 +437,7 @@ const Admin = () => {
                 imageProduit={ligne1}
                 videoProduit={lignevideo}
                 prixProduit="100 Ar**200 Ar" />
-              <form onSubmit={handleEnvoyerProduit}>
+              <form onSubmit={sendData}>
                 <div class="w-[30%] m-auto mt-10 p-[20px_10px] border-blue-500 border-3 rounded-[20px]">
                   <div class="bg-[rgb(210,210,210)] w-[15%] absolute text-[25px] font-semibold mt-[-40px]">
                     <div class="w-full">
@@ -502,6 +510,8 @@ const Admin = () => {
                       <div>
                         <input class="m-auto text-right w-full p-0 border-b-2 w-[40%] border-b-red-500"
                                 type="number"
+                                min={0}
+                                max={100}
                                 placeholder='Reduction'
                                 onChange={(e) => {
                                   setReduction(e.target.value)
@@ -511,6 +521,7 @@ const Admin = () => {
                         <input class="m-auto text-right w-full p-0 border-b-2 w-[40%] border-b-blue-500"
                                type="number"
                                placeholder='P.U'
+                               min={0}
                                onChange={(e) => {
                                 setPrix_unitaire(e.target.value)
                                }} required />
@@ -519,6 +530,7 @@ const Admin = () => {
                         <input class="m-auto text-right w-full p-0 border-b-2 w-[40%] border-b-blue-500"
                                 type="number"
                                 placeholder='Quantité'
+                                min={0}
                                 onChange={(e) => {
                                   setQte(e.target.value)
                                 }} />
