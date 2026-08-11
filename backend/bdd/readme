@@ -1,0 +1,293 @@
+const { Database } = require('lucide-react')
+const mysql = require('mysql2')
+
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '', 
+    database: 'mysql'
+
+});
+
+// ======================================================
+// 2. CONNEXION
+// ======================================================
+
+connection.connect((err) => {
+
+    if (err) {
+        console.error('Erreur de connexion à MySQL :', err);
+        return;
+    }
+
+    console.log('Connecté à MySQL avec succès !');
+
+    // ==================================================
+    // 3. CRÉATION DE LA BASE DE DONNÉES
+    // ==================================================
+
+    const createDatabaseQuery = `
+        CREATE DATABASE IF NOT EXISTS bdd_venteEnLigne
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_unicode_ci
+    `;
+
+    connection.query(createDatabaseQuery, (err) => {
+
+        if (err) {
+            console.error(
+                'Erreur lors de la création de la base :',
+                err
+            );
+            return;
+        }
+
+        console.log(
+            'Base "bdd_venteEnLigne" créée ou déjà existante !'
+        );
+
+        // ==================================================
+        // 4. SÉLECTION DE LA BASE
+        // ==================================================
+
+        connection.query(
+            'USE bdd_venteEnLigne',
+            (err) => {
+
+                if (err) {
+                    console.error(
+                        'Erreur lors de la sélection de la base :',
+                        err
+                    );
+                    return;
+                }
+
+                console.log(
+                    'Base "bdd_venteEnLigne" sélectionnée !'
+                );
+
+                // ==========================================
+                // 5. TABLE t_clients
+                // ==========================================
+
+                const createClientsTable = `
+                    CREATE TABLE IF NOT EXISTS t_clients (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        nom VARCHAR(100) NOT NULL,
+                        prenom VARCHAR(100) NOT NULL,
+                        adresse VARCHAR(255),
+                        pays VARCHAR(100)
+                    )
+                `;
+
+                connection.query(
+                    createClientsTable,
+                    (err) => {
+
+                        if (err) {
+                            console.error(
+                                'Erreur création t_clients :',
+                                err
+                            );
+                            return;
+                        }
+
+                        console.log(
+                            'Table "t_clients" prête !'
+                        );
+
+                        // ======================================
+                        // 6. TABLE t_produit
+                        // ======================================
+
+                        const createProduitTable = `
+                            CREATE TABLE IF NOT EXISTS t_produit (
+                                id INT AUTO_INCREMENT PRIMARY KEY,
+
+                                nom VARCHAR(150) NOT NULL,
+
+                                id_typeproduit INT,
+
+                                video VARCHAR(255),
+
+                                image VARCHAR(255),
+
+                                prix_unitaire DECIMAL(10,2) NOT NULL,
+
+                                date_system TIMESTAMP
+                                    DEFAULT CURRENT_TIMESTAMP,
+
+                                reduction DECIMAL(5,2)
+                                    DEFAULT 0
+                            )
+                        `;
+
+                        connection.query(
+                            createProduitTable,
+                            (err) => {
+
+                                if (err) {
+                                    console.error(
+                                        'Erreur création t_produit :',
+                                        err
+                                    );
+                                    return;
+                                }
+
+                                console.log(
+                                    'Table "t_produit" prête !'
+                                );
+
+                                // ==================================
+                                // 7. TABLE t_achat
+                                // ==================================
+
+                                const createAchatTable = `
+                                    CREATE TABLE IF NOT EXISTS t_achat (
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+
+                                        id_client INT NOT NULL,
+
+                                        id_produit INT NOT NULL,
+
+                                        prix_total DECIMAL(10,2) NOT NULL,
+
+                                        mode_paiement VARCHAR(50)
+                                            NOT NULL,
+
+                                        date_system TIMESTAMP
+                                            DEFAULT CURRENT_TIMESTAMP,
+
+                                        CONSTRAINT fk_achat_client
+                                            FOREIGN KEY (id_client)
+                                            REFERENCES t_clients(id)
+                                            ON DELETE CASCADE
+                                            ON UPDATE CASCADE,
+
+                                        CONSTRAINT fk_achat_produit
+                                            FOREIGN KEY (id_produit)
+                                            REFERENCES t_produit(id)
+                                            ON DELETE CASCADE
+                                            ON UPDATE CASCADE
+                                    )
+                                `;
+
+                                connection.query(
+                                    createAchatTable,
+                                    (err) => {
+
+                                        if (err) {
+                                            console.error(
+                                                'Erreur création t_achat :',
+                                                err
+                                            );
+                                            return;
+                                        }
+
+                                        console.log(
+                                            'Table "t_achat" prête !'
+                                        );
+
+                                        // ==================================
+                                        // 8. TABLE t_caracteristique
+                                        // ==================================
+
+                                        const createCaracteristiqueTable = `
+                                            CREATE TABLE IF NOT EXISTS t_caracteristique (
+                                                id INT AUTO_INCREMENT PRIMARY KEY,
+
+                                                id_produit INT NOT NULL,
+
+                                                caracteristique VARCHAR(255)
+                                                    NOT NULL,
+
+                                                CONSTRAINT fk_caracteristique_produit
+                                                    FOREIGN KEY (id_produit)
+                                                    REFERENCES t_produit(id)
+                                                    ON DELETE CASCADE
+                                                    ON UPDATE CASCADE
+                                            )
+                                        `;
+
+                                        connection.query(
+                                            createCaracteristiqueTable,
+                                            (err) => {
+
+                                                if (err) {
+                                                    console.error(
+                                                        'Erreur création t_caracteristique :',
+                                                        err
+                                                    );
+                                                    return;
+                                                }
+
+                                                console.log(
+                                                    'Table "t_caracteristique" prête !'
+                                                );
+
+                                                // ==================================
+                                                // 9. FIN
+                                                // ==================================
+
+                                                console.log(
+                                                    '\n======================================'
+                                                );
+
+                                                console.log(
+                                                    'Base de données prête !'
+                                                );
+
+                                                console.log(
+                                                    '======================================'
+                                                );
+
+                                                console.log(
+                                                    '✓ t_clients'
+                                                );
+
+                                                console.log(
+                                                    '✓ t_produit'
+                                                );
+
+                                                console.log(
+                                                    '✓ t_achat'
+                                                );
+
+                                                console.log(
+                                                    '✓ t_caracteristique'
+                                                );
+
+                                                // Fermeture de la connexion
+                                                connection.end(
+                                                    (err) => {
+
+                                                        if (err) {
+                                                            console.error(
+                                                                'Erreur fermeture connexion :',
+                                                                err
+                                                            );
+                                                            return;
+                                                        }
+
+                                                        console.log(
+                                                            'Connexion MySQL fermée.'
+                                                        );
+                                                    }
+                                                );
+                                            }
+                                        );
+                                    }
+                                );
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    });
+});
+
+
+
+
+module.exports = connection;
