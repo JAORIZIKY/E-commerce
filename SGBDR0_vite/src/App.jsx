@@ -7,12 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Accueil from './pages/Accueil';
 import Achat from './pages/Achat';
-import Admin from './pages/Admin';
+import Admin from './pagesAdmin/Admin';
 import Apropos from './pages/Apropos';
 import Confirm from './pages/Confirm';
 import Panier from './pages/Panier';
-import Historique from './pages/Historique'
-import Parametre from './pages/Parametre'
+import Historique from './pagesAdmin/Historique'
+import Parametre from './pagesAdmin/Parametre'
 import Classement from './pages/Classement'
 
 

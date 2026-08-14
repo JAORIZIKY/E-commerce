@@ -211,7 +211,7 @@ connection.connect((err) => {
 
                                                                     id_produit INT NOT NULL,
 
-                                                                    nom_video VARCHAR(255) NOT NULL,
+                                                                    nom_video TEXT NOT NULL,
 
                                                                     date_system TIMESTAMP
                                                                         DEFAULT CURRENT_TIMESTAMP,
@@ -244,7 +244,7 @@ connection.connect((err) => {
 
                                                                             id_produit INT NOT NULL,
                                                                             
-                                                                            nom_image VARCHAR(255) NOT NULL,
+                                                                            nom_image TEXT NOT NULL,
                                                                             
                                                                             date_system TIMESTAMP
                                                                                 DEFAULT CURRENT_TIMESTAMP,

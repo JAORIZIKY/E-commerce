@@ -214,6 +214,15 @@ app.post('/api/vente', (req, res) => {
 app.get('/api/vente/:inform', (req, res) => {
     const { inform } = req.params
     const info = inform.split("§")
+    const values = []
+    console.log(info);
+    
+    if (info.length === 3) {
+        values = [info[2]]
+        console.log(values);
+        
+    }
+    
     const colonnes = info[0]
     const tables = info[1] 
     console.log(colonnes);
@@ -222,7 +231,31 @@ app.get('/api/vente/:inform', (req, res) => {
     
     const query = `SELECT ${colonnes} FROM bdd_vente_en_ligne.${tables}`;
     
-    db.query(query, (err, results) => {
+    db.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Erreur de récupération :', err);
+            return res.status(500).json({ message: 'Erreur serveur' });
+        }
+        console.log("Selection se fait avec succès")
+        console.log(results);
+        
+        res.json(results);
+    });
+});
+app.get('/api/innerJoin/:values', (req, res) => {
+    const {values} = req.params
+    console.log("le type du produit: " + values);
+    
+    const query = `SELECT DISTINCT t_produit.id,nom, qte, prix_unitaire,reduction,t_produit.date_system,t_video.nom_video, t_image.nom_image, t_typeProduit.nomType 
+                    FROM t_produit INNER JOIN t_image, t_video, t_typeProduit
+                        WHERE 
+                            (t_image.id_produit = t_produit.id AND t_video.id_produit = t_produit.id)
+                            AND t_typeProduit.id = t_produit.id_typeProduit
+                            AND t_typeProduit.nomType = ?
+                        ORDER BY t_produit.id ASC
+                        `;
+    
+    db.query(query, [values], (err, results) => {
         if (err) {
             console.error('Erreur de récupération :', err);
             return res.status(500).json({ message: 'Erreur serveur' });

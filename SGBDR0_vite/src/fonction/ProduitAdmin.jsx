@@ -15,7 +15,7 @@ function ProduitAdmin(props){
     let tableButton = []
     let tableButtonRed = []
     nomProduits.map((nomProduit, i) => (
-      tableLien.push(["m-auto z-30", true]) 
+      tableLien.push(["m-0 p-0 m-auto z-30 justify-center flex w-full", true]) 
     ))
 
     const [reste, setReste] = useState(nombreRestant)
@@ -162,7 +162,7 @@ async function sendData(event) {
         <div class="flex w-screen mt-10">
         {nomProduits.map((nomProduit, i) => (
               <div key={i} class="w-[30%] m-auto p-[20px_10px] hover:[border:1px_solid] hover:[transform:scale(0.96)] [transition:100ms_ease_all] border-blue-500 border-3 hover:[box-shadow:0px_0px_10px_black] rounded-[20px]">
-                <div class="hover:absolute bg-[rgb(210,210,210)] p-[10px] absolute text-[25px] font-semibold mt-[-40px]">
+                <div class="bg-[rgb(210,210,210)] p-[10px] absolute text-[25px] font-semibold mt-[-40px] w-[200px]">
                   <input class="w-full border-b-2" placeholder={nomProduit} onChange={(e) => {
                     nomProduits[i] = e.target.value
                     setNomProduits(nomProduits)}} />
@@ -256,9 +256,9 @@ async function sendData(event) {
                 </div>
                 <div class="w-full flex">
                   <form class="w-full flex">
-                    <div class="m-auto w-[400px] bg-[rgba(255,255,255,0.5)] h-[40px] absolute"></div>
                     <div type="submit" class={classLien[i][0]}>
-                      <div class="w-[200px] h-[40px] bg-green-500 hover:bg-green-400 rounded-[10px] p-[10px] text-white text-center mt-4 m-auto">
+                      <div class="m-0 m-auto w-[200px] bg-[rgba(255,255,255,0.5)] h-[40px] absolute"></div>
+                      <div class="m-0 w-[200px] h-[40px] m-auto bg-green-500 hover:bg-green-400 rounded-[10px] p-[10px] text-white text-center m-auto">
                           Acheter
                       </div>
                     </div>

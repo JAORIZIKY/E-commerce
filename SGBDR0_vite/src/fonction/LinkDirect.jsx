@@ -7,7 +7,7 @@ function LinkDirect(props) {
     return (
         <>
             {liens.map((lien, i) => (
-                <li>
+                <li key={i}>
                     <Link class={props.classLink} to={lien}>
                         {sonNom[i]}
                     </Link>
